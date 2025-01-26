@@ -22,20 +22,11 @@ stages:
     - apt-get update
 
   # Put your custom actions below this comment
-
-  - name: libvirt-packages
-    type: apt
-    source:
-      packages:
-      - qemu-kvm
-      - libvirt-daemon
-      - bridge-utils
-      - virtinst
-      - libvirt-daemon-system
-      #- libguestfs-tools
-      - libosinfo-bin
-      - qemu-system
-      - virt-manager
+  
+  - name: qemu-kvm
+    type: includes
+    includes: 
+      - modules/50-setup-qemu-kvm.yml
 
   - name: packagesrandom
     type: apt

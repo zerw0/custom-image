@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# References:
+#  * https://gitlab.com/libvirt/libvirt/-/blob/ef7c0f46f9629f6bc9537703df5b78efc2d69ab0/libvirt.spec.in#L1756
+#  * https://gitlab.com/libvirt/libvirt/-/blob/ef7c0f46f9629f6bc9537703df5b78efc2d69ab0/libvirt.spec.in#L1885
+
+# Create libvirt groups if they don't already exist
+getent group 'libvirt' >/dev/null || groupadd -r 'libvirt' || :
+getent group 'kvm' >/dev/null || groupadd -f -g '36' -r 'kvm' || :
+getent group 'qemu' >/dev/null || groupadd -f -g '107' -r 'qemu' || :
+
+# Create qemu and kvm users
+if ! getent passwd 'qemu' >/dev/null; then
+  if ! getent passwd '107' >/dev/null; then
+    useradd -r -u '107' -g 'qemu' -G 'kvm' -d '/' -s '/sbin/nologin' -c 'qemu user' 'qemu' || :
+  else
+    useradd -r -g 'qemu' -G 'kvm' -d '/' -s '/sbin/nologin' -c 'qemu user' 'qemu' || :
+  fi
+fi
+
+# Create libvirt-qemu user, see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=768000
+getent group 'libvirt-qemu' >/dev/null || groupadd -r 'libvirt-qemu' || :
+
+getent passwd 'libvirt-qemu' >/dev/null || useradd -r -g 'libvirt-qemu' -G 'libvirt-qemu,libvirt,kvm,qemu' -d '/' -s '/sbin/nologin' -c 'libvirt-qemu user' 'libvirt-qemu' || :
+
+# Add all sudoers to libvirt and kvm as they are system administrators anyway
+sudo_users=$(getent group sudo | cut -d: -f4 | tr ',' ' ')
+for user in $sudo_users; do
+  gpasswd -a "$user" libvirt
+  gpasswd -a "$user" kvm
+done
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=Create QEMU-KVM users and groups and add all existing administrators to the libvirt and kvm groups
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/vos-setup-qemu-kvm-users
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
