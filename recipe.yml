@@ -1,4 +1,4 @@
-name: VanillaOS + Tailscale + QEMU # Replace this name with your image name
+name: hdvos # Replace this name with your image name
 id: hdvos # Replace this ID with your image ID
 stages:
 - id: build
@@ -37,11 +37,13 @@ stages:
       - qemu-system
       - virt-manager
 
-  - name: ddcutil
+  - name: packagesrandom
     type: apt
     source:
       packages:
       - ddcutil
+      - gnome-tweaks
+      - software-properties-common
 
   - name: install-tailscale # Sample module demonstrating the Shell module with custom commands
     type: shell
