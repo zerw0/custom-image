@@ -1,5 +1,5 @@
-name: Custom Vanilla Desktop # Replace this name with your image name
-id: custom # Replace this ID with your image ID
+name: VanillaOS + Tailscale + QEMU # Replace this name with your image name
+id: hdvos # Replace this ID with your image ID
 stages:
 - id: build
   base: ghcr.io/vanilla-os/desktop:main # Optionally, Replace this image URL with a different one i.e. nvidia:main, etc
@@ -23,18 +23,35 @@ stages:
 
   # Put your custom actions below this comment
 
-  - name: example-packages # Sample module using the built-in Apt module to install packages
+  - name: libvirt-packages
     type: apt
     source:
       packages:
-      - vim
+      - qemu-kvm
+      - libvirt-daemon
+      - bridge-utils
+      - virtinst
+      - libvirt-daemon-system
+      #- libguestfs-tools
+      - libosinfo-bin
+      - qemu-system
+      - virt-manager
 
-  - name: example-commands # Sample module demonstrating the Shell module with custom commands
+  - name: ddcutil
+    type: apt
+    source:
+      packages:
+      - ddcutil
+
+  - name: install-tailscale # Sample module demonstrating the Shell module with custom commands
     type: shell
     commands:
-    - echo Example output
+    - mkdir -p --mode=0755 /usr/share/keyrings
+    - curl -fsSL https://pkgs.tailscale.com/stable/debian/sid.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+    - curl -fsSL https://pkgs.tailscale.com/stable/debian/sid.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+    - apt-get update && apt-get install -y tailscale
 
-  - name: example-modules # Sample module demonstrating importing local and remote modules
+  - name: modules # Sample module demonstrating importing local and remote modules
     type: includes
     includes:
       - modules/50-install-debs.yml # Sample local module present in this repository
